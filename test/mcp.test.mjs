@@ -10,12 +10,12 @@ test("real stdio MCP handshake, discovery, resource reads, review and invalid in
     try {
         await client.connect(transport);
         const { tools } = await client.listTools();
-        assert.equal(tools.length, 7);
+        assert.equal(tools.length, 11);
         assert.ok(tools.every((tool) => tool.annotations.readOnlyHint));
         const guidance = await client.callTool({ name: "get_infrontofx_guidance", arguments: { topic: "nui" } });
         assert.match(guidance.content[0].text, /Vue/);
         const resources = await client.listResources();
-        assert.equal(resources.resources.length, 5);
+        assert.equal(resources.resources.length, 8);
         const resource = await client.readResource({ uri: "infrontofx://guidance/security" });
         assert.match(resource.contents[0].text, /Server-only credentials/);
         const plan = await client.callTool({ name: "plan_fivem_resource", arguments: { name: "../bad", ui: "vue" } });
@@ -26,6 +26,9 @@ test("real stdio MCP handshake, discovery, resource reads, review and invalid in
         assert.equal(JSON.parse(review.content[0].text).findings[0].rule, "html-sink");
         const refused = await client.callTool({ name: "inspect_fivem_resource", arguments: { resource: "../outside" } });
         assert.equal(refused.isError, true);
+        const noSkill = await client.callTool({ name: "get_infrontofx_skill", arguments: { section: "standard" } });
+        assert.equal(noSkill.isError, true);
+        assert.match(noSkill.content[0].text, /INFRONTOFX_SKILL_ROOT/);
     } finally {
         await client.close();
     }

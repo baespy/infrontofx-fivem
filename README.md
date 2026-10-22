@@ -1,6 +1,6 @@
 # infrontofx / FiveM
 
-A local FiveM development MCP, house-style guidance, and an authenticated realtime telemetry bridge. Built around [infrontofx-skill](https://github.com/baespy/infrontofx-skill).
+A local toolkit for writing, debugging and reviewing FiveM resources, connected directly to your installed [infrontofx-skill](https://github.com/baespy/infrontofx-skill). Includes an optional authenticated realtime telemetry bridge.
 
 [คู่มือเริ่มใช้ภาษาไทย](docs/START.th.md)
 
@@ -10,8 +10,8 @@ This is an initial development release. MCP protocol and transport behavior are 
 
 | Component | Purpose |
 | --- | --- |
-| Local stdio MCP | Seven read-only tools: guidance, source triage, manifest parsing, bounded resource inspection, official native lookup and resource planning |
-| Five guidance resources | Architecture, security, performance, React/Vue/Svelte NUI, realtime integration |
+| Local stdio MCP | Eleven read-only tools: installed-skill search/retrieval, task context, canonical template previews, source triage, manifest parsing, resource inspection, official native lookup and planning |
+| Eight guidance resources | Architecture, security, performance, React/Vue/Svelte NUI, database, debugging, networking and optional realtime integration |
 | `1nfx_bridge` | Server-side WebSocket telemetry with authentication, origin allowlist, publisher ownership, limits, heartbeat and stop cleanup |
 | `1nfx_telemetry` | ESX + FC example publishing player/resource counts; no player identifiers |
 | CLI subscriber | A reconnecting client for verifying the telemetry feed |
@@ -40,19 +40,20 @@ Use your client's stdio MCP configuration with absolute paths:
       "command": "node",
       "args": ["/absolute/path/infrontofx-fivem/src/mcp.mjs"],
       "env": {
-        "INFRONTOFX_RESOURCES_ROOT": "/absolute/path/to/resources"
+        "INFRONTOFX_RESOURCES_ROOT": "/absolute/path/to/resources",
+        "INFRONTOFX_SKILL_ROOT": "/absolute/path/to/infrontofx-skill"
       }
     }
   }
 }
 ```
 
-`INFRONTOFX_RESOURCES_ROOT` is optional. Without it, local resource inspection is disabled; pasted-source and reference tools still work. On Windows use `C:/...` paths or escape backslashes in JSON.
+Both roots are explicit and optional. Without `INFRONTOFX_RESOURCES_ROOT`, local resource inspection is disabled. Without `INFRONTOFX_SKILL_ROOT`, installed-skill retrieval/search, task context and template preview are disabled. Pasted-source review, bundled guidance, native lookup and planning still work. On Windows use `C:/...` paths or escape backslashes in JSON.
 
 For Codex CLI, replace the two absolute paths:
 
 ```sh
-codex mcp add infrontofx-fivem --env INFRONTOFX_RESOURCES_ROOT=/absolute/path/to/resources -- node /absolute/path/infrontofx-fivem/src/mcp.mjs
+codex mcp add infrontofx-fivem --env INFRONTOFX_RESOURCES_ROOT=/absolute/path/to/resources --env INFRONTOFX_SKILL_ROOT=/absolute/path/to/infrontofx-skill -- node /absolute/path/infrontofx-fivem/src/mcp.mjs
 codex mcp list
 ```
 
@@ -63,6 +64,10 @@ Example requests:
 - "Use infrontofx-skill and inspect the 1nfx_inventory resource; separate confirmed problems from pattern matches."
 - "Look up GET_PLAYER_PED for the server API set and show the official source."
 - "Plan a Vue NUI resource using FC and the standard readiness handshake."
+- "Compose the database workflow from my installed skill, inspect the target resource, then implement the requested persistence fix."
+- "Find the house rules about yield and player identity; read the complete matching sections before editing."
+
+For everyday coding, use the installed skill + MCP. You do not need to install the telemetry resources, build a web dashboard, or connect a live game server just to use the development tools.
 
 ## MCP tools
 
@@ -70,6 +75,10 @@ Example requests:
 | --- | --- |
 | `list_infrontofx_topics` | Discover focused guidance |
 | `get_infrontofx_guidance` | Read one topic |
+| `get_infrontofx_skill` | Read one of 25 approved references from the installed skill, with a content digest |
+| `search_infrontofx_skill` | Literal search across those references, returning file/line locations |
+| `compose_fivem_context` | Load task-specific installed references for create/debug/security/performance/database/NUI/integration, with an optional frontend framework |
+| `preview_fivem_template` | Return the canonical installed shop example's source with renamed controllers; no filesystem writes |
 | `review_fivem_source` | Pattern-based triage of pasted code, with line numbers |
 | `validate_fxmanifest` | Parse declarations without executing Lua |
 | `inspect_fivem_resource` | Read a resource strictly inside the configured root; no source contents returned |
@@ -132,7 +141,9 @@ npm run build
 node scripts/verify-native.mjs
 ```
 
-Tests exercise a real stdio MCP client handshake, source/manifest review, path traversal and junction rejection, secret-file skipping, inspection budgets, websocket auth/origins, payload and connection limits, publisher bounds and port release on shutdown. The native smoke test requires internet and is separate from offline CI.
+Tests exercise a real stdio MCP client handshake, source/manifest review, installed-skill reads and digests, literal search, context selection, template name substitution without writes, path traversal/junction rejection, secret-file skipping, inspection budgets, websocket auth/origins, payload and connection limits, publisher bounds and port release on shutdown. The native smoke test requires internet and is separate from offline CI.
+
+Installed-skill reads use a fixed reference/template allowlist, reject paths escaping the configured root and cap each file at 64 KB. Search reads at most 512 KB; composed context returns at most 32,000 reference characters and reports truncation. Templates are examples that require adaptation and live testing; the tool does not generate an arbitrary finished feature.
 
 Before using on a live server: verify the export caller identity in FXServer, stop/start both resources, connect/disconnect clients, check malformed messages and slow peers, and measure actual resmon/profiler data. Node tests do not substitute for those checks. Keep this on a development server until those checks pass.
 
@@ -147,5 +158,9 @@ Researched 2026-10-22:
 - [Official MCP TypeScript SDK](https://github.com/modelcontextprotocol/typescript-sdk)
 - [ws API and backpressure controls](https://github.com/websockets/ws/blob/master/doc/ws.md)
 - [OpenAI MCP configuration example](https://developers.openai.com/learn/docs-mcp)
+- [Official ESX core](https://github.com/esx-framework/esx_core)
+- [oxmysql transaction semantics](https://overextended.dev/docs/oxmysql/Functions/transaction)
+- [ox_lib server callbacks](https://overextended.dev/docs/ox_lib/Callback/Lua/Server)
+- [Cfx state bags](https://docs.fivem.net/docs/scripting-manual/networking/state-bags/)
 
 The references discussed with the user — fivem-mcp, ws_lib, isle-admin and chatz — informed the scope comparison. They are not dependencies, and no compatibility with them is implied.

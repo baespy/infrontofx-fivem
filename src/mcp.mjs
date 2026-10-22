@@ -7,9 +7,10 @@ import { topics, getGuidance, resourcePlan } from "./knowledge.mjs";
 import { reviewSource, validateManifest } from "./review.mjs";
 import { inspectResource } from "./workspace.mjs";
 import { fetchNativeIndex, findNatives } from "./natives.mjs";
+import { sections, workflows, readSkill, searchSkill, composeContext, previewTemplate } from "./skill.mjs";
 
 export function createServer() {
-    const server = new McpServer({ name: "infrontofx-fivem", version: "0.1.0" });
+    const server = new McpServer({ name: "infrontofx-fivem", version: "0.2.0" });
     const readOnly = { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false };
     const tool = (name, description, inputSchema, fn, annotations = readOnly) => server.registerTool(name, { description, inputSchema, annotations }, async (args) => {
         try {
@@ -20,6 +21,10 @@ export function createServer() {
         }
     });
     tool("list_infrontofx_topics", "List FiveM guidance topics aligned with infrontofx-skill.", {}, () => topics);
+    tool("get_infrontofx_skill", "Read a selected reference directly from the installed infrontofx-skill, with a content digest. Requires INFRONTOFX_SKILL_ROOT; never reads arbitrary paths.", { section: z.enum(Object.keys(sections)) }, ({ section }) => readSkill(process.env.INFRONTOFX_SKILL_ROOT, section));
+    tool("search_infrontofx_skill", "Find relevant house rules by literal terms across approved installed-skill references, with file and line locations.", { query: z.string().min(2).max(160), limit: z.number().int().min(1).max(12).default(6) }, ({ query, limit }) => searchSkill(process.env.INFRONTOFX_SKILL_ROOT, query, limit));
+    tool("compose_fivem_context", "Read the installed house references needed for one coding workflow and optional NUI framework. Use before implementing or reviewing a FiveM resource.", { workflow: z.enum(Object.keys(workflows)), ui: z.enum(["none", "vanilla", "react", "vue", "svelte"]).default("none") }, ({ workflow, ui }) => composeContext(process.env.INFRONTOFX_SKILL_ROOT, workflow, ui));
+    tool("preview_fivem_template", "Preview source files from the installed canonical house shop example, with a validated resource/controller name. Does not write files or implement arbitrary requested features.", { name: z.string().min(2).max(64) }, ({ name }) => previewTemplate(process.env.INFRONTOFX_SKILL_ROOT, name));
     tool("get_infrontofx_guidance", "Read focused guidance. Existing project instructions and the installed infrontofx-skill remain authoritative for house conventions.", { topic: z.enum(Object.keys(topics)) }, ({ topic }) => getGuidance(topic));
     tool("review_fivem_source", "Pattern-based advisory review of pasted Lua/NUI source. Does not execute code or prove security. Do not send credentials.", { code: z.string().max(128_000), side: z.enum(["client", "server", "nui"]) }, ({ code, side }) => reviewSource(code, side));
     tool("validate_fxmanifest", "Parse a pasted Lua manifest without executing it; inspect declared API, distribution and load order. Lua 5.3-compatible manifest syntax only.", { code: z.string().max(64_000) }, ({ code }) => validateManifest(code));

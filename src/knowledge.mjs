@@ -6,6 +6,9 @@ export const topics = {
     performance: "Profiling, bounded work, scoped updates and lifecycle cleanup",
     nui: "NUI bridge, React, Vue, Svelte, focus and safe rendering",
     realtime: "Authenticated telemetry, backpressure and reconnect semantics",
+    database: "oxmysql persistence, conditional mutations, indexes and ESX ownership",
+    debugging: "Client/server/NUI diagnosis, reproduction and evidence",
+    networking: "OneSync, state bags, entity ownership and routing buckets",
 };
 
 export async function getGuidance(topic) {
