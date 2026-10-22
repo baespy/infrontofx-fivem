@@ -1,0 +1,21 @@
+{
+  "name": "infrontofx-fivem",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "FiveM development MCP and bounded realtime telemetry for infrontofx.",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "start": "node src/mcp.mjs",
+    "test": "node --test test/*.test.mjs",
+    "build": "node scripts/build.mjs",
+    "check": "node --check src/mcp.mjs && node --check src/bridge.mjs && npm test && npm run build"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "1.32.1",
+    "luaparse": "0.3.1",
+    "ws": "8.22.0",
+    "zod": "^3.25.0"
+  },
+  "devDependencies": { "esbuild": "^0.25.0" }
+}
