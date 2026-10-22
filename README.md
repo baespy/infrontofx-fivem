@@ -2,6 +2,8 @@
 
 A local FiveM development MCP, house-style guidance, and an authenticated realtime telemetry bridge. Built around [infrontofx-skill](https://github.com/baespy/infrontofx-skill).
 
+[คู่มือเริ่มใช้ภาษาไทย](docs/START.th.md)
+
 This is an initial development release. MCP protocol and transport behavior are tested in Node; the resources still need live FXServer validation. No performance or production-readiness claim is made.
 
 ## What's included
